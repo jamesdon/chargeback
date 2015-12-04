@@ -1,0 +1,38 @@
+
+/* Cell Highlighting */
+
+/* 
+#highlight2 td {
+    background-color: #c1ffc3 !important;
+}
+*/
+
+#highlight2 td.range-low {
+    background-color: #ffffff !important;
+    color: #ffffff !important;
+}
+
+#highlight2 td.range-red {
+    background-color: #ff9999 !important;
+    color: #000000 !important;
+}
+
+#highlight2 td.range-green {
+    background-color: #99ff99 !important;
+    color: #000000 !important;
+}
+
+#highlight2 td.range-blue {
+    background-color: #99c2ff !important;
+    color: #000000 !important;
+}
+
+#highlight2 td.range-purple {
+    background-color: #e699ff !important;
+    color: #000000 !important;
+}
+
+#highlight2 td.range-alert {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+}

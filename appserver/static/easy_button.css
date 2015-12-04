@@ -1,0 +1,94 @@
+/*Buttons_110215*/
+
+/* This is the cut and paste button below to place directly underneath the <panel> demarcation in your simple XML page.
+This snippet runs a sourcetype search with a pipe to anomalies that gets redirected towards the "cluster" tab. A pretty easy way to spot trouble.
+That's why its called the "easy button".
+<html id="yourid">
+  <span class="dashboard-view-controls" >
+        <div class="btn-group">
+          <a class="btn edit-btn" style="padding:4px 10px !important;" href="http://YOURURL:8000/en-US/app/YOURAPP/search?q=search%20index%3DYOURINDEX%20%28sourcetype%3D(yoursourcetype)%20OR%20sourcetype%3DYOURSOURCETYPE%20OR%20SOURCETYPE%3DSOURCETYPE*%29%20|%20(anomalies)&amp;earliest=-60m%40m&amp;latest=now&amp;display.page.search.tab=patterns&amp;sid=1424832181.944"><img src="/static/app/YOURAPP/easy_button.svg" style="margin-top:-3px; padding-right: 10px; height: 200%"/>Easy Button</a>
+        </div>
+  </span>
+</html>
+*/
+
+/* menu float*/
+#menu_row_float {
+display:block;
+float:left;
+position:relative;
+background-color: none !important; top: -451px;
+left: -45%;
+width: 20% !important;
+}
+
+/* button id's - name your button -- like "easy_button" below. They are placed in an absolute fashion.*/
+#btn_easy_button {
+    position:absolute;
+    display:block;
+    float: left;
+    top: -48px;
+    left:450px;
+    z-index: 2;
+    margin-right:10px;
+    width:150px !important;
+}
+
+#btn_info {
+	position:absolute;
+    display:block;
+    float: left;
+    top: -265px;
+    left:896px;
+    z-index: 2;
+    margin-right:10px;
+    width:145px !important;
+}
+
+#btn_config {
+  position:absolute;
+    display:block;
+    float: left;
+    top: -205px;
+    left:1020px;
+    z-index: 2;
+    margin-right:10px;
+    width:140px !important;
+}
+
+/* options for button themes */
+.easy {
+    text-align:right;
+    /*font-size:8px !important;*/
+    font-weight:bold;
+    background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(246,246,246,1)), color-stop(100%, rgba(237,237,237,1)));
+    background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed', GradientType=0 );
+    background-repeat: repeat-x;
+    background-color: #FFF;
+    padding-left: 12px;
+    border: 1px solid #BFBFBF;
+    color: #333;
+    box-shadow: 0px 1px 1px  0px #333 outset;
+    border-radius: 4px;
+}
+/* Button Effects */
+
+.btn:hover {
+    -moz-box-shadow: 1px #00b200;
+    -webkit-box-shadow: 1px #00b200;
+    box-shadow: 1px #00b200;
+}
+
+.left{
+    border-radius: 4px 0px 0px 4px !important;
+}
+
+.right{
+    border-radius: 0px 4px 4px 0px !important;
+}
+

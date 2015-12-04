@@ -1,0 +1,438 @@
+<form stylesheet="easy_button_audit.css,tabs.css,table_cell_highlighting.css,table_cell_highlighting2.css,table_cell_highlighting_string.css,table_decorations.css" script="tabs.js,table_cell_highlighting.js,table_cell_highlighting2.js,table_cell_highlighting_string.js,table_row_highlighting.js">
+  <search id="globalSearch">
+    <query>index=_internal source=*license_usage.log type="Usage" 
+      | eval h=if(len(h)=0 OR isnull(h),"(SQUASHED)",h) 
+      | eval s=if(len(s)=0 OR isnull(s),"(SQUASHED)",s) 
+      | eval idx=if(len(idx)=0 OR isnull(idx),"(UNKNOWN)",idx) | bin _time span=1d
+      | search group=$group|s$ 
+      | stats sum(b) as b by _time, pool, s, st, h, idx   
+      | timechart span=1d sum(b) AS volumeB by idx fixedrange=false 
+      | fields - _timediff 
+      | foreach * [eval &lt;&lt;FIELD&gt;&gt;=round('&lt;&lt;FIELD&gt;&gt;'/1024/1024/1024, 3)]</query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <search id="globalCalc">
+    <query>| rest /services/data/indexes 
+      | rename title as idx 
+      | join max=0 idx [| inputlookup customers.csv] 
+      | search group=$group|s$
+      
+      | eval license_rate          = $license_rate$
+      | eval hot_warm_storage_rate = $hot_warm_storage_rate$
+      | eval cold_storage_rate     = $cold_storage_rate$
+      | eval "Years Retention"     = round(frozenTimePeriodInSecs/31536000,2)
+
+      | foreach *MB [ eval &lt;&lt;MATCHSTR&gt;&gt;GB = '&lt;&lt;FIELD&gt;&gt;' / 1024 ]
+
+      | eval hot_warm_conf         = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
+      | eval hot_warm_storage_cost = hot_warm_conf * hot_warm_storage_rate * percent_ownership / 100
+
+      | eval cold_conf         = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
+      | eval cold_conf         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_conf)
+      | eval cold_storage_cost = cold_conf * cold_storage_rate * percent_ownership / 100
+      | eval total_storage_conf_gb = hot_warm_conf + cold_conf
+
+      | eval stor_cost = (hot_warm_storage_cost + cold_storage_cost)
+
+      | eval lic_cost  = max_lic_GB * license_rate * percent_ownership / 100
+      
+      | addcoltotals lic_cost stor_cost hot_warm_storage_cost cold_storage_cost         
+      | eval total_cost    = lic_cost+stor_cost              
+      | eval unused_lic_GB = max_lic_GB-currentDBSizeGB
+      
+      | foreach *_cost *_rate *GB cold_conf percent_ownership [ eval &lt;&lt;FIELD&gt;&gt; = round( '&lt;&lt;FIELD&gt;&gt;' , 2 ) ]
+
+      | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
+ 
+      | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
+
+      | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Storage GB", unused_lic_GB AS "Unused Lic GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, homePath_expanded AS "Hot/Warm Path", coldPath_expanded AS "Cold Path", percent_ownership AS "Percent Ownership", hot_warm_conf AS "Hot/Warm Conf GB", cold_conf AS "Cold Conf GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB"</query>
+  </search>
+  <label>Charge Back</label>
+  <fieldset autoRun="true" submitButton="true">
+    <input type="dropdown" token="group" searchWhenChanged="true">
+      <label>Select a Group:</label>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <search>
+        <query>index=_internal source=*license_usage.log type="Usage" 
+          | append [| inputlookup customers.csv] 
+          | stats count by group</query>
+        <earliest>-30d</earliest>
+        <latest>now</latest>
+      </search>
+      <fieldForLabel>group</fieldForLabel>
+      <fieldForValue>group</fieldForValue>
+      <valuePrefix>group="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter> OR </delimiter>
+    </input>
+    <input type="radio" token="currency_symbol" searchWhenChanged="true">
+      <label>Select Currency Symbol:</label>
+      <default>$</default>
+      <choice value="$">$</choice>
+      <choice value="€">€</choice>
+      <choice value="£">£</choice>
+      <choice value="¥">¥</choice>
+    </input>
+    <input type="text" token="license_rate" searchWhenChanged="true">
+      <title>"License Rate $currency_symbol$ per GB"</title>
+      <label>License Rate per GB</label>
+      <default>4</default>
+      <initialValue>4</initialValue>
+    </input>
+    <input type="text" token="hot_warm_storage_rate" searchWhenChanged="true">
+      <label>Hot/Warm Storage Rate per GB</label>
+      <default>3</default>
+      <initialValue>3</initialValue>
+    </input>
+    <input type="text" token="cold_storage_rate" searchWhenChanged="true">
+      <label>Cold Storage Rate per GB</label>
+      <default>2</default>
+      <initialValue>2</initialValue>
+    </input>
+  </fieldset>
+  
+  <row id="tabs">
+    <panel>
+      <html>
+        <ul id="tabs" class="nav nav-tabs">
+          <li class="active">
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util" >Index Utilization and Prediction</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_calc,tab_cost" data-token="control_token_cost" >Customer Costs</a>
+          </li>          
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_audit,tab_license" >Configuration Audit</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_lic_detail" >License Configuration Details</a>
+          </li>
+          <li>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_stor_detail" >Storage Configuration Details</a>
+          </li>
+        </ul>
+      </html>
+
+      
+
+    </panel>
+  </row>
+  
+  <row id="tab_util">
+    <panel>
+      <title>Total Index Utilization for Group $group|s$</title>
+      <input type="time" token="time_tok" searchWhenChanged="true">
+        <label></label>
+        <default>
+          <earliest>-30d</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
+      <chart>
+        <title>Click on an index for predictive view.</title>
+        <search base="globalSearch"></search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <drilldown>
+          <!-- Use set to specify the new token to be created.
+                     Use any token from the page or from the click event to produce the value needed. -->
+          <set token="index">$click.name2$</set>
+        </drilldown>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">GB</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+      </chart>
+      <chart id="detail" depends="$index$">
+        <title>Predictive Analysis for index: $index$</title>
+        <search base="globalSearch">
+          <query>table _time $index$| predict $index$</query>
+        </search>
+        <earliest>$time_tok.earliest$</earliest>
+        <latest>$time_tok.latest$</latest>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="tab_calc">
+    <panel>
+      <table>
+        <title>Yearly License Charges for $group|s$</title>
+        <search base="globalCalc">
+          <query>table Index, "Splunk Server", "Max Conf GB", "License Rate", "Percent Ownership", "License Cost"               | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "License Rate"="$currency_symbol$".tostring('License Rate',"commas")             | eval "License Cost"="$currency_symbol$".tostring('License Cost',"commas")</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">15</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Yearly Storage Charges for $group|s$</title>
+        <search base="globalCalc">
+          <query>table Index, "Splunk Server", "Max Storage GB", "Hot/Warm Conf GB", calc_hot, "Hot/Warm Storage Rate", "Hot/Warm Storage Cost", "Cold Conf GB", "Cold Rate", "Cold Storage Cost", "Percent Ownership", "Storage Cost"                       | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "Hot/Warm Storage Cost"="$currency_symbol$".tostring('Hot/Warm Storage Cost',"commas")             | eval "Cold Storage Cost"="$currency_symbol$".tostring('Cold Storage Cost',"commas")             | eval "Storage Cost"="$currency_symbol$".tostring('Storage Cost',"commas")</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">15</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_cost">
+    <panel>
+      <chart>
+        <title>Max Conf GB Sum Distribution for $group|s$</title>
+        <search base="globalCalc">
+          <query>| chart sum("Max Conf GB") AS "Max Conf GB Sum" over Index by group</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">100</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <single>
+        <title>Yearly Expense for $group|s$ Based on Limits</title>
+        <search base="globalCalc">
+          <query>fields "Total Cost" | sort - "Total Cost" | head 1</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <option name="rangeColors">["0x65a637","0x65a637","0x65a637"]</option>
+        <option name="rangeValues">[0,1000]</option>
+        <option name="trendInterval">auto</option>
+        <option name="beforeLabel">$currency_symbol$</option>
+      </single>
+    </panel>
+  </row>  
+  
+  
+  
+  <row id="tab_audit">
+    <panel>
+      <table>
+        <title>ChargeBack Configuration Audit - Fix these immediately!</title>
+        <search>
+          <progress>
+            <!-- match attribute for condition uses eval-like expression (see Splunk search language 'eval' command) -->
+            <!-- logic: if resultCount is 0, then show a static html element, and hide the chart element -->
+            <condition match="'job.resultCount' == 0">
+              <set token="show_html">true</set>
+            </condition>
+            <condition>
+              <unset token="show_html"></unset>
+            </condition>
+          </progress>
+          <query>| set diff                                        
+            [| inputlookup customers.csv | dedup idx | fields idx | search NOT idx=*summary* | rename idx AS "Index defined in customers.csv, but is NOT defined in Splunk"]                          
+            [| rest /services/data/indexes | search isInternal=0 OR isInternal=0 | search NOT title=*summary* |  fields title | rename title AS "Index is NOT defined in customers.csv"]</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="linkView">search</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <option name="rangeColors">["0x65a637","0x65a637","0x65a637"]</option>
+        <option name="rangeValues">[0,1000]</option>
+        <option name="trendInterval">auto</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel>
+      <table id="highlight_row">
+        <title>Percent Ownership Configuration Check</title>
+        <search>
+          <query>| rest /services/data/indexes                      
+            | rename title as idx                      
+            | join max=0 idx [| inputlookup customers.csv]                       
+            | stats sum(percent_ownership) AS "Total Percent Ownership" by idx
+            | eval "Configuration Check" = if ('Total Percent Ownership' &gt; 100 OR 'Total Percent Ownership' &lt; 100, "Percent Ownership Error. It is not 100%!", "OK")</query>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>License "Max Lic GB" Configuration Audit</title>
+        <search>
+          <query>| rest /services/data/indexes                      
+            | rename title as idx
+            | join max=0 idx [| inputlookup customers.csv]
+            | rename  max_lic_GB AS "Max Conf GB"
+            | stats sum("Max Conf GB") AS "Total Max Conf GB"
+            | appendcols [| REST /services/licenser/licenses/ 
+            | fields label type quota expiration_time group_id splunk_server stack_id status updated 
+            | search status=VALID type=* 
+            | eval "License in GB"=round(quota/1024/1024/1024,0) 
+            | addtotals "License in GB" col=true 
+            | fields + "License in GB" | sort - "License in GB" | head 1]        
+            | eval Alert = if ('Total Max Conf GB' &gt; 'License in GB', "Over Subscription Detected", "None" )    
+            | table "Total Max Conf GB", "License in GB", Alert</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>"Hot/Warm", "Cold", or "Total Storage" Conf in GB Is Too Big</title>
+        <search base="globalCalc">
+          <query>| where ("Max Storage GB" &lt; "Hot/Warm Conf GB") OR ("Max Storage GB" &lt; "Cold Conf GB") OR ('Max Storage GB' &gt; 'Total Storage Conf GB') | table Index, "Hot/Warm Conf GB", "Cold Conf GB", "Total Storage Conf GB", "Max Storage GB"</query>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_license">
+    <panel>
+      <table>
+        <title>Installed License Review</title>
+        <search>
+          <query>| REST /services/licenser/licenses/ | fields label type quota expiration_time group_id splunk_server stack_id status updated  | eval license_GB=round(quota/1024/1024/1024,0) | eval valid_lic=if(status=="VALID",license_GB,0) | addcoltotals license_GB,valid_lic | rename label AS Label, type AS Type, quota AS Quota, expiration_time AS "Experatin Time", grup_id AS "Group ID", splunk_server AS "Splunk Server", stack_id AS "Stack ID", status AS Status, updated AS Updated, license_GB AS "License in GB", valid_lic AS "Valid License"</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_lic_detail">
+    <panel>
+      <table id="highlight">
+        <title>License Detail</title>
+        <search base="globalCalc">
+          <query>table Index, "Splunk Server", "App ACL", "Event Count", "Max Conf GB", "License Rate", "Percent Ownership", "License Cost", Disabled</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">100</option>
+      </table>
+    </panel>
+  </row>
+  <row id="tab_stor_detail">
+    <panel>
+      <table id="highlight2">
+        <title>Storage Detail</title>
+        <search base="globalCalc">
+          <query>table Index, "Splunk Server", "Years Retention", "Current GB Used", "Unused Lic GB", "Max Storage GB", "Percent Ownership", "Hot/Warm Max Data Size GB", "Hot/Warm Conf GB", "Hot/Warm Rate", "Hot/Warm Storage Cost", "Max Storage GB", "Hot/Warm Max Data Size GB", "Cold Max Data Size GB", "Cold Conf GB", "Cold Storage Rate", "Cold Storage Cost", "Storage Cost", "Total Cost"</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">100</option>
+      </table>
+    </panel>
+  </row>
+</form>

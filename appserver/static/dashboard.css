@@ -1,0 +1,29 @@
+/*  _______________________________ */
+/* My Customizations */
+
+.dashboard-row .dashboard-panel {
+    /* border-radius: 10px !important; */
+    border: 1px solid #CCC;
+    margin: 0px 10px 10px 0px;
+    position: relative;
+}
+
+.main-section-body {
+    color: #333;
+    min-height: 500px;
+    background: #ffffff;
+	background: -moz-linear-gradient(top, #ffffff 0%, #ededed 2%, #d6cfd6 58%, #ebe8eb 99%, #ebe8eb 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, #ffffff), color-stop(2%, #ededed), color-stop(58%, #d6cfd6), color-stop(99%, #ebe8eb), color-stop(100%, #ebe8eb));
+	background: -webkit-linear-gradient(top, #ffffff 0%, #ededed 2%, #d6cfd6 58%, #ebe8eb 99%, #ebe8eb 100%);
+	background: -o-linear-gradient(top, #ffffff 0%, #ededed 2%, #d6cfd6 58%, #ebe8eb 99%, #ebe8eb 100%);
+	background: -ms-linear-gradient(top, #ffffff 0%, #ededed 2%, #d6cfd6 58%, #ebe8eb 99%, #ebe8eb 100%);
+	background: linear-gradient(to bottom, #ffffff 0%, #ededed 2%, #d6cfd6 58%, #ebe8eb 99%, #ebe8eb 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ebe8eb', GradientType=0 );
+	/*background-image: url("logo_coke_watermark.png")!important;
+    background-repeat: none;*/
+}
+
+.dashboard-row .dashboard-panel .panel-element-row {
+    clear: both;
+    border-top: 0px solid #eee !important;
+}
