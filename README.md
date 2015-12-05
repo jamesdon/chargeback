@@ -3,6 +3,12 @@ The Charge Back App is intended to calculate maintenance and yearly run rates fo
 If you are running Splunk in a medium to large environment, you are probably sharing Splunk with other groups.  In many places, this results in one group running Splunk as a service for any number of internal customers.  The challenge then becomes sharing the maintenance and run costs of the infrastructure.  As a Splunk administrator, I would have to run several long-running searches to try and figure out the costs.  This App should put all of that to rest.
 
 
+Changes to Splunk:
+This App will not install new indexes, but will increase frozenTimePeriodInSecs to _internal to 13 months (34186670 seconds).
+
+There are not any special installation steps for this App, but there are REQUIRED configuration steps below.
+
+
 Configuration:
 You will need to update the customers.csv lookup file to customize the App to suit your needs.  Using the "Lookup File Editor App for Splunk Enterprise" App makes this extremely easy.  
 
