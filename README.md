@@ -1,14 +1,24 @@
-The Charge Back App is intended to calculate the total cost for Splunk customers, when offering Splunk as an internal service.
+The Charge Back App is intended to calculate maintenance and yearly run rates for Splunk.    
 
+If you are running Splunk in a medium to large environment, you are probably sharing Splunk with other groups.  In many places, this results in one group running Splunk as a service for any number of internal customers.  The challenge then becomes sharing the maintenance and run costs of the infrastructure.  As a Splunk administrator, I would have to run several long-running searches to try and figure out the costs.  This App should put all of that to rest.
+
+
+Configuration:
 You will need to update the customers.csv lookup file to customize the App to suit your needs.  Using the "Lookup File Editor App for Splunk Enterprise" App makes this extremely easy.  
 
 	https://splunkbase.splunk.com/app/1724/
 
-There are two dashboards for this App - Charge Back, and Charge Back and Index Configuration Audit.
+
+There is a single dashboard for this App with several tabs.  The filters at the top will effect all of the tabs.  Below, I will explain each tab.
+
+Index Utilization and Prediction:
+This dashboard is intended to allow you to visualize actual index utilization, as apposed to configured limits.  If you click on a particular index, you will see a predicted utilization of that index, which should help you plan for the future.
 
 
-Charge Back:
-This dashboard is very self0documenting, but I think that it is worth taking a look deeper at the calculations used to drive all of the numbers.  Below is the search used to drive almost all of the dashboard panels.  I have inserted comments to explain what is going on.  However, you will not be able to run this search if you copy and paste it in Splunk, the comments are not compatible with SPL:
+Customer Costs:
+This dashboard breaks out the total charges for license maintenance and storage costs.  It then combines them, so that you can send you customers an itemized bill.  
+
+I think that it is worth taking a look deeper at the calculations used to drive all of the numbers.  Below is the search used to drive almost all of the dashboard panels.  I have inserted comments to explain what is going on.  However, you will not be able to run this search if you copy and paste it in Splunk unless you remove the comments, which are not compatible with SPL:
 
 
       ### Rest call provides information about your configured indexes
@@ -61,8 +71,25 @@ This dashboard is very self0documenting, but I think that it is worth taking a l
 
 
 
-Charge Back and Index Configuration Audit:
+Configuration Audit:
+To ensure that you are providing accurate numbers to your customers, this dashboard audits both your configuration for this App as well as your indexes.  Review each dashboard panel on the top row to ensure that you are not over subscribed to an index in any particular manor.  Also look at your license configuration to ensure that you have the appropriate licenses installed.  While expired licenses will not harm you in any way, you might want to clean them up so they do not mislead you.
 
-	This dashboard is also very self-documenting.  To ensure that you are providing accurate numbers to your customers, start by updating customers.csv.  Next, look for other configuration errors that will be flagged and highlighted throughout the rest of the dashboard.
+
+License Configuration Details:
+This dashboard shows you the exact numbers used in calculating the total license cost.  It will also display RED fields when there is a configuration error.
+
+Storage Configuration Details:
+The same as the license dashboard, but created with a focus on storage.  The color-coding for fields is as follows:
+
+	Purple - Used in both "hot/warm" and "cold" storage calculations
+	Light Red - Used for "hot/warm" storage calculations
+	Light Blue - Used for "cold" storage calculations
+
+Please provide feedback and/or enhancement requests to jim@splunk.com.
+
+Application development is hosted on github - https://github.com/jamesdon/chargeback, if you would like to join in on the fun!
+
+
+
 
 
