@@ -15,7 +15,8 @@
   <search id="globalCalc">
     <query>| rest /services/data/indexes 
       | rename title as idx 
-      | join max=0 idx [| inputlookup customers.csv] 
+      | join max=0 idx [| inputlookup customers.csv]
+      | dedup group idx percent_ownership 
       | search group=$group|s$
       
       | eval license_rate          = $license_rate$
@@ -309,7 +310,7 @@
             </condition>
           </progress>
           <query>| set diff                                        
-            [| inputlookup customers.csv | dedup idx | fields idx | search NOT idx=*summary* | rename idx AS "Index defined in customers.csv, but is NOT defined in Splunk"]                          
+            [| inputlookup customers.csv | dedup idx | fields idx | dedup group idx percent_ownership | search NOT idx=*summary* | rename idx AS "Index defined in customers.csv, but is NOT defined in Splunk"]                          
             [| rest /services/data/indexes | search isInternal=0 OR isInternal=0 | search NOT title=*summary* |  fields title | rename title AS "Index is NOT defined in customers.csv"]</query>
         </search>
         <option name="drilldown">cell</option>
@@ -338,7 +339,8 @@
         <search>
           <query>| rest /services/data/indexes                      
             | rename title as idx                      
-            | join max=0 idx [| inputlookup customers.csv]                       
+            | join max=0 idx [| inputlookup customers.csv]
+            | dedup group idx percent_ownership 
             | stats sum(percent_ownership) AS "Total Percent Ownership" by idx
             | eval "Configuration Check" = if ('Total Percent Ownership' &gt; 100 OR 'Total Percent Ownership' &lt; 100, "Percent Ownership Error. It is not 100%!", "OK")</query>
         </search>
@@ -354,6 +356,7 @@
           <query>| rest /services/data/indexes                      
             | rename title as idx
             | join max=0 idx [| inputlookup customers.csv]
+            | dedup group idx percent_ownership 
             | rename  max_lic_GB AS "Max Conf GB"
             | stats sum("Max Conf GB") AS "Total Max Conf GB"
             | appendcols [| REST /services/licenser/licenses/ 

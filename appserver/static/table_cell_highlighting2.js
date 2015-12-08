@@ -20,7 +20,7 @@ require([
             // Apply interpretation for Purple default values
             if (cell.field === 'Max Storage GB' || cell.field === 'Percent Ownership') {
                 if (value >= 0) {
-                    $td.addClass('range-cell').addClass('range-purple');
+                    $td.addClass('range-cell').addClass('range-orange');
                 }
                 else if (value < 0) {
                     $td.addClass('range-cell').addClass('range-alert');

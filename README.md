@@ -30,10 +30,12 @@ I think that it is worth taking a look deeper at the calculations used to drive 
       ### Rest call provides information about your configured indexes
       ### Rename the index field so that you can join the data in customers.csv
       ### "max=0" allows for multiple groups to share the same index, and assume a percentage of ownership
+      ### The Dedup accounts for the csv being read multiple times in a Search head Cluster environment
       ### To zoom in a particular  group, select it from the dropdown menu 
       | rest /services/data/indexes 
       | rename title as idx 
       | join max=0 idx [| inputlookup customers.csv] 
+      | dedup group idx percent_ownership
       | search group="$group$"
       
       ### We are setting the variables from the form and calculating "Years Retention"
@@ -87,15 +89,19 @@ This dashboard shows you the exact numbers used in calculating the total license
 Storage Configuration Details:
 The same as the license dashboard, but created with a focus on storage.  The color-coding for fields is as follows:
 
-	Purple - Used in both "hot/warm" and "cold" storage calculations
-	Light Red - Used for "hot/warm" storage calculations
-	Light Blue - Used for "cold" storage calculations
+	Orange - Used in both "hot/warm" and "cold" storage calculations
+	Red - Used for "hot/warm" storage calculations
+	Blue - Used for "cold" storage calculations
 
 Please provide feedback and/or enhancement requests to jim@splunk.com.
 
 Application development is hosted on github - https://github.com/jamesdon/chargeback, if you would like to join in on the fun!
 
 
+Contributing Authors:
+James Donn
+Kristofer Hutchinson
+Burch Simon
 
 
 
