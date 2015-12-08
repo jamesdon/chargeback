@@ -1,4 +1,4 @@
-<form stylesheet="easy_button_audit.css,tabs.css,table_cell_highlighting.css,table_cell_highlighting2.css,table_cell_highlighting_string.css,table_decorations.css" script="tabs.js,table_cell_highlighting.js,table_cell_highlighting2.js,table_cell_highlighting_string.js,table_row_highlighting.js">
+<form stylesheet="easy_button.css,tabs.css,table_cell_highlighting.css,table_cell_highlighting2.css,table_cell_highlighting_string.css,table_decorations.css" script="tabs.js,table_cell_highlighting.js,table_cell_highlighting2.js,table_cell_highlighting_string.js,table_row_highlighting.js">
   <search id="globalSearch">
     <query>index=_internal source=*license_usage.log type="Usage" 
       | eval h=if(len(h)=0 OR isnull(h),"(SQUASHED)",h) 
@@ -23,19 +23,19 @@
       | eval hot_warm_storage_rate = $hot_warm_storage_rate$
       | eval cold_storage_rate     = $cold_storage_rate$
       | eval "Years Retention"     = round(frozenTimePeriodInSecs/31536000,2)
-
+      
       | foreach *MB [ eval &lt;&lt;MATCHSTR&gt;&gt;GB = '&lt;&lt;FIELD&gt;&gt;' / 1024 ]
-
+      
       | eval hot_warm_conf         = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
       | eval hot_warm_storage_cost = hot_warm_conf * hot_warm_storage_rate * percent_ownership / 100
-
+      
       | eval cold_conf         = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
       | eval cold_conf         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_conf)
       | eval cold_storage_cost = cold_conf * cold_storage_rate * percent_ownership / 100
       | eval total_storage_conf_gb = hot_warm_conf + cold_conf
-
+      
       | eval stor_cost = (hot_warm_storage_cost + cold_storage_cost)
-
+      
       | eval lic_cost  = max_lic_GB * license_rate * percent_ownership / 100
       
       | addcoltotals lic_cost stor_cost hot_warm_storage_cost cold_storage_cost         
@@ -43,11 +43,11 @@
       | eval unused_lic_GB = max_lic_GB-currentDBSizeGB
       
       | foreach *_cost *_rate *GB cold_conf percent_ownership [ eval &lt;&lt;FIELD&gt;&gt; = round( '&lt;&lt;FIELD&gt;&gt;' , 2 ) ]
-
+      
       | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
- 
+      
       | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
-
+      
       | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Storage GB", unused_lic_GB AS "Unused Lic GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, homePath_expanded AS "Hot/Warm Path", coldPath_expanded AS "Cold Path", percent_ownership AS "Percent Ownership", hot_warm_conf AS "Hot/Warm Conf GB", cold_conf AS "Cold Conf GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB"</query>
   </search>
   <label>Charge Back</label>
@@ -70,7 +70,7 @@
       <delimiter> OR </delimiter>
     </input>
     <input type="radio" token="currency_symbol" searchWhenChanged="true">
-      <label>Select Currency Symbol:</label>
+      <label>Currency Symbol:</label>
       <default>$</default>
       <choice value="$">$</choice>
       <choice value="€">€</choice>
@@ -79,51 +79,92 @@
     </input>
     <input type="text" token="license_rate" searchWhenChanged="true">
       <title>"License Rate $currency_symbol$ per GB"</title>
-      <label>License Rate per GB</label>
+      <label>License Rate / GB</label>
       <default>4</default>
       <initialValue>4</initialValue>
     </input>
     <input type="text" token="hot_warm_storage_rate" searchWhenChanged="true">
-      <label>Hot/Warm Storage Rate per GB</label>
+      <label>Hot/Warm Storage Rate / GB</label>
       <default>3</default>
       <initialValue>3</initialValue>
     </input>
     <input type="text" token="cold_storage_rate" searchWhenChanged="true">
-      <label>Cold Storage Rate per GB</label>
+      <label>Cold Storage Rate / GB</label>
       <default>2</default>
       <initialValue>2</initialValue>
     </input>
   </fieldset>
-  
   <row id="tabs">
     <panel>
+      <!-- begin easy_button container element -->
+      <html id="btn_element1">
+        <div class="btn-group1">
+          <!-- trigger instructions modal -->
+          <a class="btn btn-instruction left" href="#" data-toggle="modal" data-target="#desc1">Instructions<i class="icon-info-circle icon-large"/>
+          </a>
+          <!-- configure button -->
+          <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;namespace=chargeback&amp;lookup=customers.csv&amp;type=csv">Edit Config<i class="icon-gear icon-large"/>
+          </a>
+        </div>
+      </html>
+      <!-- end easy_button container element -->
       <html>
         <ul id="tabs" class="nav nav-tabs">
           <li class="active">
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util" >Index Utilization and Prediction</a>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util">Index Utilization and Prediction</a>
           </li>
           <li>
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_calc,tab_cost" data-token="control_token_cost" >Customer Costs</a>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_calc,tab_cost" data-token="control_token_cost">Customer Costs</a>
           </li>          
           <li>
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_audit,tab_license" >Configuration Audit</a>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_audit,tab_license">Configuration Audit</a>
           </li>
           <li>
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_lic_detail" >License Configuration Details</a>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_lic_detail">License Configuration Details</a>
           </li>
           <li>
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_stor_detail" >Storage Configuration Details</a>
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_stor_detail">Storage Configuration Details</a>
           </li>
         </ul>
       </html>
-
-      
-
     </panel>
   </row>
-  
   <row id="tab_util">
     <panel>
+      <!-- begin modal button conatiner element-->
+      <html>
+        <div class="modal fade" id="desc1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="z-index:2000;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">
+                  <img src="/static/app/chargeback/btn_info.svg" style="padding-right:10px;height:30px;"/>The Chargeback App: How to use.
+                </h4>
+              </div>
+              <div class="modal-body">
+                <p>
+                  <b>Set Up</b> - This panel contains set up information for the Chargeback app. <code>Note that you will need to download the "<a href="https://splunkbase.splunk.com/app/1724/">File Lookup Editor App</a>"</code> from Splunk apps in order for you to input and edit groups, costs, etc. <br/>
+                  <br/>
+                  <code>You will then need to update the customers.csv </code> file to reflect the departments in your environment. There is a "ChargeBack Configuration Audit" below, which will help you identify anything that is missing. <br/>
+                  <br/>
+                  <b>Column Headers</b> - Do not alter the names of the column headers - group, idx, max_lic_GB <br/>
+                  <br/>
+                  <b>Group</b> - These are the different departments that you are providing Splunk as a service to. <br/>
+                  <br/>
+                  <b>IDX</b> - These are the indexes that you have configured. Match the names exactly. <br/>
+                  <br/>
+                  <b>MAX_LIC_GB</b> - This is the maximum daily data volume in GBs that your customer is going to use. This is used to calculate the total cost to the customer. <br/>
+                  <br/>
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </html>
+      <!-- end modal button container element-->
       <title>Total Index Utilization for Group $group|s$</title>
       <input type="time" token="time_tok" searchWhenChanged="true">
         <label></label>
@@ -290,10 +331,7 @@
         <option name="beforeLabel">$currency_symbol$</option>
       </single>
     </panel>
-  </row>  
-  
-  
-  
+  </row>
   <row id="tab_audit">
     <panel>
       <table>

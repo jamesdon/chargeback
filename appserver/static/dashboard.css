@@ -1,13 +1,12 @@
 /*  _______________________________ */
-/* My Customizations */
+/* Overrides to Mr. Sparkle General v1 - 120715*/
 
 .dashboard-row .dashboard-panel {
     /* border-radius: 10px !important; */
-    border: 1px solid #CCC;
+    border: 0px solid #CCC;
     margin: 0px 10px 10px 0px;
     position: relative;
 }
-
 .main-section-body {
     color: #333;
     min-height: 500px;
@@ -23,7 +22,39 @@
     background-repeat: none;*/
 }
 
+/* Specific to Chargeback App  - 120715*/
 .dashboard-row .dashboard-panel .panel-element-row {
     clear: both;
     border-top: 0px solid #eee !important;
+}
+input, textarea, .uneditable-input {
+    width: 150px !important;
+}
+.fieldset .input {
+    width: 155px !important;
+}
+#input2 label{
+    text-align:right;
+}
+#input3 {
+	margin-left:20px;
+}
+.dashboard-header h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    padding: 0px;
+    font-weight: 200;
+}
+.input-timerangepicker .shared-timerangepicker .caret {
+    float: none !important;
+}
+.splunk-radiogroup .choice {
+    margin-left: 65px;
+}
+.splunk-multidropdown .select2-container, .splunk-dropdown .select2-container, .shared-controls-multiinputcontrol .select2-container, .splunk-multidropdown .select2-container-multi, .splunk-dropdown .select2-container-multi, .shared-controls-multiinputcontrol .select2-container-multi {
+    min-width: 125px !important;
+    margin-bottom: 8px;
+}
+.splunk-radiogroup input {
+    width: 50px !important;
 }
