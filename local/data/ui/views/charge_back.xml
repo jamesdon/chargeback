@@ -103,7 +103,7 @@
           <a class="btn btn-instruction left" href="#" data-toggle="modal" data-target="#desc1">Instructions<i class="icon-info-circle icon-large"/>
           </a>
           <!-- configure button -->
-          <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;namespace=chargeback&amp;lookup=customers.csv&amp;type=csv">Edit Config<i class="icon-gear icon-large"/>
+          <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;path=chargeback/customers.csv">Edit Config<i class="icon-gear icon-large"/>
           </a>
         </div>
       </html>
@@ -147,13 +147,15 @@
                   <br/>
                   <code>You will then need to update the customers.csv </code> file to reflect the departments in your environment. There is a "ChargeBack Configuration Audit" below, which will help you identify anything that is missing. <br/>
                   <br/>
-                  <b>Column Headers</b> - Do not alter the names of the column headers - group, idx, max_lic_GB <br/>
+                  <b>Column Headers</b> - Do not alter the names of the column headers - group, idx, max_lic_GB, percent_ownership. <br/>
                   <br/>
-                  <b>Group</b> - These are the different departments that you are providing Splunk as a service to. <br/>
+                  <b>group</b> - These are the different departments that you are providing Splunk as a service to. <br/>
                   <br/>
-                  <b>IDX</b> - These are the indexes that you have configured. Match the names exactly. <br/>
+                  <b>idx</b> - These are all of the indexes that you have configured in Splunk. Match the names exactly. <br/>
                   <br/>
-                  <b>MAX_LIC_GB</b> - This is the maximum daily data volume in GBs that your customer is going to use. This is used to calculate the total cost to the customer. <br/>
+                  <b>max_lic_GB</b> - This is the maximum daily data volume in GBs that your customer is going to consume. This is used to calculate the total cost to the customer. <br/>
+                  <br/>
+                  <b>percent_ownership</b> - There are times when two groups will share the same index for one or more reasons.  Use this field to assign the percent of ownership that a group has of an index. <br />
                   <br/>
                 </p>
               </div>
