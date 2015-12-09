@@ -103,7 +103,7 @@
           <a class="btn btn-instruction left" href="#" data-toggle="modal" data-target="#desc1">Instructions<i class="icon-info-circle icon-large"/>
           </a>
           <!-- configure button -->
-          <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;path=chargeback/customers.csv">Edit Config<i class="icon-gear icon-large"/>
+          <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;namespace=chargeback&amp;lookup=customers.csv&amp;type=csv&amp;earliest=0&amp;latest">Edit Config<i class="icon-gear icon-large"/>
           </a>
         </div>
       </html>
