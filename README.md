@@ -98,6 +98,14 @@ Please provide feedback and/or enhancement requests to jim@splunk.com.
 Application development is hosted on github - https://github.com/jamesdon/chargeback, if you would like to join in on the fun!
 
 
+Custom Buttons:
+The custom buttons at the top of the dashboard are intended to simplify the configuration.  If the "Edit Config" button does not work for you, check the following:
+
+	Ensure that you have the "Lookup Edit" App installed.
+
+	Check the URL that is used if you manually browse to edit the file.  You can then update the XML to contain that path.  In some cases, different permissions will change that URL.  Also be sure to add "amp;" after each & in the XML.
+
+
 Contributing Authors:
 James Donn
 Kristofer Hutchinson
