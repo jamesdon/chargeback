@@ -11,14 +11,14 @@ require([
     var CustomRangeRenderer = TableView.BaseCellRenderer.extend({
         canRender: function(cell) {
             // Enable this custom cell renderer for all fields evaluated below
-            return _(['Years Retention','Current GB Used','Hot/Warm Max Data Size GB','Max Storage GB','Hot/Warm Conf GB','Hot/Warm Rate','Hot/Warm Storage Cost','Cold Max Data Size GB','Max Storage GB','Cold Conf GB','Cold Rate','Cold Storage Cost','Storage Cost','Storage Cost','Percent Ownership','Total Cost', 'Available Lic GB']).contains(cell.field);
+            return _(['Years Retention','Current GB Used','Max Hot/Warm Size GB','Max Index Size GB','Hot/Warm Calc GB','Hot/Warm Rate','Hot/Warm Storage Cost','Max Cold Size GB','Cold Calc GB','Cold Rate','Cold Storage Cost','Storage Cost','Storage Cost','Percent Ownership','Total Cost', 'Available Lic GB']).contains(cell.field);
         },
         render: function($td, cell) {
             // Add a class to the cell based on the returned value
             var value = parseFloat(cell.value);
 
             // Apply interpretation for Purple default values
-            if (cell.field === 'Max Storage GB' || cell.field === 'Percent Ownership') {
+            if (cell.field === 'Max Index Size GB' || cell.field === 'Percent Ownership') {
                 if (value >= 0) {
                     $td.addClass('range-cell').addClass('range-orange');
                 }
@@ -31,7 +31,7 @@ require([
             }
 
             // Apply interpretation for Blue default values
-            if (cell.field === 'Cold Max Data Size GB' || cell.field === 'Cold Conf GB' || cell.field === 'Cold Rate' || cell.field === 'Cold Storage Cost') {
+            if (cell.field === 'Max Cold Size GB' || cell.field === 'Cold Calc GB' || cell.field === 'Cold Rate' || cell.field === 'Cold Storage Cost') {
                 if (value >= 0) {
                     $td.addClass('range-cell').addClass('range-blue');
                 }
@@ -44,7 +44,7 @@ require([
             }
 
             // Apply interpretation for Red default values
-            if (cell.field === 'Hot/Warm Max Data Size GB' || cell.field === 'Hot/Warm Conf GB' || cell.field === 'Hot/Warm Rate' || cell.field === 'Hot/Warm Storage Cost') {
+            if (cell.field === 'Max Hot/Warm Size GB' || cell.field === 'Hot/Warm Calc GB' || cell.field === 'Hot/Warm Rate' || cell.field === 'Hot/Warm Storage Cost') {
                 if (value >= 0) {
                     $td.addClass('range-cell').addClass('range-red');
                 }

@@ -26,29 +26,33 @@
       
       | foreach *MB [ eval &lt;&lt;MATCHSTR&gt;&gt;GB = '&lt;&lt;FIELD&gt;&gt;' / 1024 ]
       
-      | eval hot_warm_conf         = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
-      | eval hot_warm_storage_cost = hot_warm_conf * hot_warm_storage_rate * percent_ownership / 100
+      | eval hot_warm_calc_gb      = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
+      | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * percent_ownership / 100
       
-      | eval cold_conf         = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
-      | eval cold_conf         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_conf)
-      | eval cold_storage_cost = cold_conf * cold_storage_rate * percent_ownership / 100
-      | eval total_storage_conf_gb = hot_warm_conf + cold_conf
+      | eval cold_calc_gb        = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
+      | eval cold_calc_gb         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_calc_gb)
+      | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * percent_ownership / 100
+      
+      | eval total_storage_conf_gb = hot_warm_calc_gb + cold_calc_gb
       
       | eval stor_cost = (hot_warm_storage_cost + cold_storage_cost)
       
       | eval lic_cost  = max_lic_GB * license_rate * percent_ownership / 100
       
+      | eval homePathmaxDataSizeGB = 'homePath.maxDataSizeGB'
+      | eval coldPathmaxDataSizeGB = 'coldPath.maxDataSizeGB'
+      
       | addcoltotals lic_cost stor_cost hot_warm_storage_cost cold_storage_cost         
       | eval total_cost    = lic_cost+stor_cost              
       | eval unused_lic_GB = max_lic_GB-currentDBSizeGB
       
-      | foreach *_cost *_rate *GB cold_conf percent_ownership [ eval &lt;&lt;FIELD&gt;&gt; = round( '&lt;&lt;FIELD&gt;&gt;' , 2 ) ]
+      | foreach *_cost *_rate *GB cold_calc_gb percent_ownership [ eval &lt;&lt;FIELD&gt;&gt; = round( '&lt;&lt;FIELD&gt;&gt;' , 2 ) ]
       
-      | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
+      | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB
       
-      | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_conf, hot_warm_storage_rate, hot_warm_storage_cost, cold_conf, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group
+      | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB
       
-      | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Storage GB", unused_lic_GB AS "Available Lic GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, homePath_expanded AS "Hot/Warm Path", coldPath_expanded AS "Cold Path", percent_ownership AS "Percent Ownership", hot_warm_conf AS "Hot/Warm Conf GB", cold_conf AS "Cold Conf GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB"</query>
+      | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf License GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Index Size GB", unused_lic_GB AS "Available Lic GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, percent_ownership AS "Percent Ownership", hot_warm_calc_gb AS "Hot/Warm Calc GB", cold_calc_gb AS "Cold Calc GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB",homePathmaxDataSizeGB AS "Max Hot/Warm Size GB", coldPathmaxDataSizeGB AS "Max Cold Size GB"</query>
   </search>
   <label>Charge Back</label>
   <fieldset autoRun="true" submitButton="true">
@@ -251,7 +255,7 @@
       <table>
         <title>Yearly License Charges for $group|s$</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "Max Conf GB", "License Rate", "Percent Ownership", "License Cost"               | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "License Rate"="$currency_symbol$".tostring('License Rate',"commas")             | eval "License Cost"="$currency_symbol$".tostring('License Cost',"commas")</query>
+          <query>table Index, "Splunk Server", "Max Conf License GB", "License Rate", "Percent Ownership", "License Cost"               | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "License Rate"="$currency_symbol$".tostring('License Rate',"commas")             | eval "License Cost"="$currency_symbol$".tostring('License Cost',"commas")</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -264,7 +268,7 @@
       <table>
         <title>Yearly Storage Charges for $group|s$</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "Max Storage GB", "Hot/Warm Conf GB", calc_hot, "Hot/Warm Storage Rate", "Hot/Warm Storage Cost", "Cold Conf GB", "Cold Rate", "Cold Storage Cost", "Percent Ownership", "Storage Cost"                       | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "Hot/Warm Storage Cost"="$currency_symbol$".tostring('Hot/Warm Storage Cost',"commas")             | eval "Cold Storage Cost"="$currency_symbol$".tostring('Cold Storage Cost',"commas")             | eval "Storage Cost"="$currency_symbol$".tostring('Storage Cost',"commas")</query>
+          <query>table Index, "Splunk Server", "Max Index Size GB", "Hot/Warm Calc GB", "Hot/Warm Calc GB", "Hot/Warm Storage Rate", "Hot/Warm Storage Cost", "Cold Calc GB", "Cold Rate", "Cold Storage Cost", "Percent Ownership", "Storage Cost"                       | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "Hot/Warm Storage Cost"="$currency_symbol$".tostring('Hot/Warm Storage Cost',"commas")             | eval "Cold Storage Cost"="$currency_symbol$".tostring('Cold Storage Cost',"commas")             | eval "Storage Cost"="$currency_symbol$".tostring('Storage Cost',"commas")</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -277,9 +281,9 @@
   <row id="tab_cost">
     <panel>
       <chart>
-        <title>Max Conf GB Sum Distribution for $group|s$</title>
+        <title>Max Conf License GB Sum Distribution for $group|s$</title>
         <search base="globalCalc">
-          <query>| chart sum("Max Conf GB") AS "Max Conf GB Sum" over Index by group</query>
+          <query>| chart sum("Max Conf License GB") AS "Max Conf License GB Sum" over Index by group</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -397,16 +401,16 @@
             | rename title as idx
             | join max=0 idx [| inputlookup customers.csv]
             | dedup group idx percent_ownership 
-            | rename  max_lic_GB AS "Max Conf GB"
-            | stats sum("Max Conf GB") AS "Total Max Conf GB"
+            | rename  max_lic_GB AS "Max Conf License GB"
+            | stats sum("Max Conf License GB") AS "Total Max Conf License GB"
             | appendcols [| REST /services/licenser/licenses/ 
             | fields label type quota expiration_time group_id splunk_server stack_id status updated 
             | search status=VALID type=* 
             | eval "License in GB"=round(quota/1024/1024/1024,0) 
             | addtotals "License in GB" col=true 
             | fields + "License in GB" | sort - "License in GB" | head 1]        
-            | eval Alert = if ('Total Max Conf GB' &gt; 'License in GB', "Over Subscription Detected", "None" )    
-            | table "Total Max Conf GB", "License in GB", Alert</query>
+            | eval Alert = if ('Total Max Conf License GB' &gt; 'License in GB', "Over Subscription Detected", "None" )    
+            | table "Total Max Conf License GB", "License in GB", Alert</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
@@ -453,7 +457,7 @@
       <table id="highlight">
         <title>License Detail</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "App ACL", "Event Count", "Max Conf GB", "License Rate", "Percent Ownership", "License Cost", Disabled</query>
+          <query>table Index, "Splunk Server", "App ACL", "Event Count", "Max Conf License GB", "License Rate", "Percent Ownership", "License Cost", Disabled</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -468,7 +472,7 @@
       <table id="highlight2">
         <title>Storage Detail</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "Years Retention", "Current GB Used", "Available Lic GB", "Max Storage GB", "Percent Ownership", "Hot/Warm Max Data Size GB", "Hot/Warm Conf GB", "Hot/Warm Rate", "Hot/Warm Storage Cost", "Max Storage GB", "Hot/Warm Max Data Size GB", "Cold Max Data Size GB", "Cold Conf GB", "Cold Storage Rate", "Cold Storage Cost", "Storage Cost", "Total Cost"</query>
+          <query>table Index, "Splunk Server", "Years Retention", "Current GB Used", "Available Lic GB", "Percent Ownership", "Max Index Size GB", "Max Hot/Warm Size GB", "Hot/Warm Max Data Size GB", "Hot/Warm Calc GB", "Hot/Warm Rate", "Hot/Warm Storage Cost", "Max Storage GB", "Max Cold Size GB", "Cold Calc GB", "Cold Storage Rate", "Cold Storage Cost", "Storage Cost", "Total Cost"</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
