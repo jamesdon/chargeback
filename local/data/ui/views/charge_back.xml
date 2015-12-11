@@ -1,14 +1,9 @@
 <form stylesheet="easy_button.css,tabs.css,table_cell_highlighting.css,table_cell_highlighting2.css,table_cell_highlighting_string.css,table_decorations.css" script="tabs.js,table_cell_highlighting.js,table_cell_highlighting2.js,table_cell_highlighting_string.js,table_row_highlighting.js">
   <search id="globalSearch">
-    <query>index=_internal source=*license_usage.log type="Usage" 
-      | eval h=if(len(h)=0 OR isnull(h),"(SQUASHED)",h) 
-      | eval s=if(len(s)=0 OR isnull(s),"(SQUASHED)",s) 
-      | eval idx=if(len(idx)=0 OR isnull(idx),"(UNKNOWN)",idx) | bin _time span=1d
-      | search group=$group|s$ 
-      | stats sum(b) as b by _time, pool, s, st, h, idx   
-      | timechart span=1d sum(b) AS volumeB by idx fixedrange=false 
-      | fields - _timediff 
-      | foreach * [eval &lt;&lt;FIELD&gt;&gt;=round('&lt;&lt;FIELD&gt;&gt;'/1024/1024/1024, 3)]</query>
+    <query>index=_internal source=*license_usage.log type="Usage" group="$group$"
+ | foreach h s idx [eval &lt;&lt;FIELD&gt;&gt;=if(len(&lt;&lt;FIELD&gt;&gt;)=0 OR isnull(&lt;&lt;FIELD&gt;&gt;),"(SQUASHED)",&lt;&lt;FIELD&gt;&gt;)]
+ | timechart fixedrange=false span=1d sum(b) AS volumeB by idx
+ | foreach * [eval &lt;&lt;FIELD&gt;&gt;=round('&lt;&lt;FIELD&gt;&gt;'/pow(1024,3),3)]</query>
     <earliest>$time_tok.earliest$</earliest>
     <latest>$time_tok.latest$</latest>
   </search>
