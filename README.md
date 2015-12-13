@@ -63,9 +63,10 @@ I think that it is worth taking a look deeper at the calculations used to drive 
       | eval stor_cost = (hot_warm_storage_cost + cold_storage_cost)
       | eval lic_cost  = max_lic_GB * license_rate * percent_ownership / 100
 
-      ### Setting the new field name for convenience 
+      ### Setting the new field name for convenience and gathering their total
       | eval homePathmaxDataSizeGB = 'homePath.maxDataSizeGB'
       | eval coldPathmaxDataSizeGB = 'coldPath.maxDataSizeGB'
+      | eval totalPathmaxDataSizeGB = homePathmaxDataSizeGB + coldPathmaxDataSizeGB
       
       ### Calculate totals and some more calculations for analysis
       | addcoltotals lic_cost stor_cost hot_warm_storage_cost cold_storage_cost         
