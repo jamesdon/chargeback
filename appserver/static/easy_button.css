@@ -1,0 +1,271 @@
+/*easy_button_120615 |  kris hutchinson hutch@splunk.com */
+/* README: The below example is the cut and paste button code  to place directly 
+underneath the <panel> demarcation in your simple XML page.
+WHY: There might be something you want immediate available. 
+This snippet runs a sourcetype search with a pipe to anomalies 
+that gets redirected towards the "cluster" tab. 
+A pretty easy way to spot trouble.
+Example Code: A button group and modal. 
+	<!-- begin easy_button container element -->
+      <html id="btn_element1">
+          <div class="btn-group1">
+            <!-- trigger instructions modal -->
+            <a class="btn btn-instruction left" href="#" data-toggle="modal" data-target="#desc1">Instructions<i class="icon-info-circle icon-large"></i></a>
+            <!-- configure button -->
+            <a class="btn btn-config right" href="/app/lookup_editor/lookup_edit?owner=admin&amp;path=chargeback/customers.csv">Edit Config<i class="icon-gear icon-large"></i></a>
+          </div>
+      </html>
+      <!-- end easy_button container element -->
+      <!-- begin modal button conatiner element-->
+      <html>
+        <div class="modal fade" id="desc1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="z-index:2000;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">
+                  <img src="/static/app/chargeback/btn_info.svg" style="padding-right:10px;height:30px;" />The Chargeback App: How to use.
+                </h4>
+              </div>
+              <div class="modal-body">
+                <p>
+                  <b>Set Up</b> - This panel contains set up information for the Chargeback app. <code>Note that you will need to download the "<a href="https://splunkbase.splunk.com/app/1724/">File Lookup Editor App</a>"</code> from Splunk apps in order for you to input and edit groups, costs, etc. <br />
+                  <br />
+                  <code>You will then need to update the customers.csv </code> file to reflect the departments in your environment. There is a "Configuration Audit" tab below, which will help you identify anything that is missing or configured incorrectly. <br />
+                  <br />
+                  <b>Column Headers</b> - Do not alter the names of the column headers - group, idx, max_lic_GB, percent_ownership <br />
+                  <br />
+                  <b>group</b> - These are the different departments that you are providing Splunk as a service to. <br />
+                  <br />
+                  <b>idx</b> - These are all of the indexes that you have configured in Splunk. Match the names exactly. <br />
+                  <br />
+                  <b>max_lic_GB</b> - This is the maximum daily data volume in GBs that your customer is going to consume. This is used to calculate the total cost to the customer. <br />
+                  <br />
+                  <b>percent_ownership</b> - There are times when two groups will share the same index for one or more reasons.  Use this field to assign the percent of ownership that a group has of an index. <br />
+                  <br />
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </html>
+      <!-- end modal button container element-->
+*/
+/* Information: button id's - name your button -- like "btn_config" below. 
+They are placed in relative fashion based on its container id. The container 
+id's seen as #btn_element1 below*/
+
+/* This is the button container. Its properties decides where your button/buttons
+end up on the page. If you use multiple buttons make sure you change the id, for
+example #btn-element2 ... and so on */
+
+#btn_element1 {
+	position:absolute !important;
+    z-index:1000;
+    vertical-align: middle;
+    float: left;
+    top: -205px !important;
+    left:142px !important;
+    margin-right:10px;
+    width:auto !important;
+    padding-top:2px;
+}
+.btn-group1 {
+    vertical-align: middle;
+    white-space: nowrap;
+    padding-top:2px;
+}
+#desc1 {
+display:none;
+}
+/* options for button themes : core overrides*/
+.btn-easy {
+    background-color: #61a035;
+    background-image: -moz-linear-gradient(top, #65a637, #5c9732);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#65a637), to(#5c9732));
+    background-image: -webkit-linear-gradient(top, #65a637, #5c9732);
+    background-image: -o-linear-gradient(top, #65a637, #5c9732);
+    background-image: linear-gradient(to bottom, #65a637, #5c9732);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff65a637', endColorstr='#ff5c9732', GradientType=0);
+    border: 1px solid #4e802a;
+    border-bottom-color: #4e802a;
+    border-top-color: #4e802a;
+    color: #fff;
+    -webkit-box-shadow: inset 0 1px 0 #6aae3a;
+    -moz-box-shadow: inset 0 1px 0 #6aae3a;
+    box-shadow: inset 0 1px 0 #6aae3a;
+    text-shadow: none;
+}
+/* begin styles used for buttons on this page */
+.btn-instruction {
+     background-color: #4691CA;
+    background-image: -moz-linear-gradient(top, #4691CA, #3863a0);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#4691CA), to(#3863a0));
+    background-image: -webkit-linear-gradient(top, #4691CA, #3863a0);
+    background-image: -o-linear-gradient(top, #4691CA, #3863a0);
+    background-image: linear-gradient(to bottom, #4691CA, #3863a0);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4691CA', endColorstr='#3863a0', GradientType=0);
+    border: 1px solid #3854A2;
+    border-bottom-color: #3854A2;
+    border-top-color:#3854A2;
+    color: #fff;
+    -webkit-box-shadow: inset 0 1px 0 #4691CA;
+    -moz-box-shadow: inset 0 1px 0 #4691CA;
+    box-shadow: inset 0 1px 0 #4691CA;
+    text-shadow: none;
+}
+.btn-config {
+    background-color: #eeeeee;
+    background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#eeeeee), to(#cccccc));
+    background-image: -webkit-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: -o-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: linear-gradient(to bottom, #eeeeee, #cccccc);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc', GradientType=0);
+    border: 1px solid #bbbbbb;
+    border-bottom-color: #bbbbbb;
+    border-top-color: #bbbbbb;
+    color: #000;
+    -webkit-box-shadow: inset 0 1px 0  #F2F2F2;
+    -moz-box-shadow: inset 0 1px 0  #F2F2F2;
+    box-shadow: inset 0 1px 0  #F2F2F2;
+    text-shadow: none;
+}
+/* end styles used for buttons on this page */
+.btn-blue {
+    background-color: #4691CA;
+    background-image: -moz-linear-gradient(top, #4691CA, #3863a0);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#4691CA), to(#3863a0));
+    background-image: -webkit-linear-gradient(top, #4691CA, #3863a0);
+    background-image: -o-linear-gradient(top, #4691CA, #3863a0);
+    background-image: linear-gradient(to bottom, #4691CA, #3863a0);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4691CA', endColorstr='#3863a0', GradientType=0);
+    border: 1px solid #3854A2;
+    border-bottom-color: #3854A2;
+    border-top-color:#3854A2;
+    color: #fff;
+    -webkit-box-shadow: inset 0 1px 0  #4691CA;
+    -moz-box-shadow: inset 0 1px 0  #4691CA;
+    box-shadow: inset 0 1px 0  #4691CA;
+    text-shadow: none;
+}
+.btn-ltgray {
+    background-color: #f7f7f7;
+    background-image: -moz-linear-gradient(top, #f7f7f7, #dddddd);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f7f7f7), to(#dddddd));
+    background-image: -webkit-linear-gradient(top, #f7f7f7, #dddddd);
+    background-image: -o-linear-gradient(top, #f7f7f7, #dddddd);
+    background-image: linear-gradient(to bottom, #f7f7f7, #dddddd);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd', GradientType=0);
+    border: 1px solid #bbbbbb;
+    border-bottom-color: #bbbbbb;
+    border-top-color: #bbbbbb;
+    color: #000;
+    -webkit-box-shadow: inset 0 1px 0 #333;
+    -moz-box-shadow: inset 0 1px 0 #333;
+    box-shadow: inset 0 1px 0 #333;
+    text-shadow: none;
+}
+.btn-medgray {
+    background-color: #eeeeee;
+    background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#eeeeee), to(#cccccc));
+    background-image: -webkit-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: -o-linear-gradient(top, #eeeeee, #cccccc);
+    background-image: linear-gradient(to bottom, #eeeeee, #cccccc);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc', GradientType=0);
+    border: 1px solid #bbbbbb;
+    border-bottom-color: #bbbbbb;
+    border-top-color: #bbbbbb;
+    color: #000;
+    -webkit-box-shadow: inset 0 1px 0 #F2F2F2;
+    -moz-box-shadow: inset 0 1px 0 #666;
+    box-shadow: inset 0 1px 0 #666;
+    text-shadow: none;
+}
+/* core overrides below */
+.fieldset {
+    margin-bottom: 15px;
+    white-space: nowrap;
+}
+.btn-primary {
+    background-color: #61a035;
+    background-image: -moz-linear-gradient(top, #65a637, #5c9732);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#65a637), to(#5c9732));
+    background-image: -webkit-linear-gradient(top, #65a637, #5c9732);
+    background-image: -o-linear-gradient(top, #65a637, #5c9732);
+    background-image: linear-gradient(to bottom, #65a637, #5c9732);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff65a637', endColorstr='#ff5c9732', GradientType=0);
+    background-color: #65a637;
+    border: 1px solid #4e802a;
+    border-bottom-color: #4e802a;
+    border-top-color: #4e802a;
+    color: #fff;
+    -webkit-box-shadow: inset 0 1px 0 #6aae3a;
+    -moz-box-shadow: inset 0 1px 0 #6aae3a;
+    box-shadow: inset 0 1px 0 #6aae3a;
+    text-shadow: none;
+}
+.btn-draggable {
+    cursor: move;
+    padding-left: 15px;
+    width: 113px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: left;
+    position: relative;
+}
+.btn btn-edit {
+    background-color: #f4f4f4;
+    background-image: -moz-linear-gradient(top, #f8f8f8, #eee);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f8f8f8), to(#eee));
+    background-image: -webkit-linear-gradient(top, #f8f8f8, #eee);
+    background-image: -o-linear-gradient(top, #f8f8f8, #eee);
+    background-image: linear-gradient(to bottom, #f8f8f8, #eee);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff8f8f8', endColorstr='#ffeeeeee', GradientType=0);
+    background-color: #eee;
+    border: 1px solid #bfbfbf;
+    border-top-color: #bfbfbf;
+    border-bottom-color: #bfbfbf;
+    color: #333;
+    -webkit-box-shadow: inset 0 1px 0 #fdfdfd;
+    -moz-box-shadow: inset 0 1px 0 #fdfdfd;
+    box-shadow: inset 0 1px 0 #fdfdfd;
+    background-position: 0;
+    text-shadow: none;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+/* button icon overrides : look at /en-US/static/docs/style/style-guide.html#icons */
+.icon-large {
+    font-size: 1.8em;
+    vertical-align: middle;
+    margin-left:10px !important;
+}
+/* Button Effects */
+.btn:hover {
+    -moz-box-shadow: 1px #00b200;
+    -webkit-box-shadow: 1px #00b200;
+    box-shadow: 1px #00b200;
+}
+.left{
+    border-radius: 4px 0px 0px 4px !important;
+}
+.right{
+    border-radius: 0px 4px 4px 0px !important;
+}
+.middle{
+    border-radius: 0px 0px 0px 0px !important;
+}
