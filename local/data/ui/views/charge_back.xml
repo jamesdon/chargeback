@@ -22,16 +22,17 @@
       | eval license_rate          = $license_rate$
       | eval hot_warm_storage_rate = $hot_warm_storage_rate$
       | eval cold_storage_rate     = $cold_storage_rate$
+      | eval rep_factor            = $rep_factor$
       | eval "Years Retention"     = round(frozenTimePeriodInSecs/31536000,2)
       
       | foreach *MB [ eval &lt;&lt;MATCHSTR&gt;&gt;GB = '&lt;&lt;FIELD&gt;&gt;' / 1024 ]
       
       | eval hot_warm_calc_gb      = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
-      | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * percent_ownership / 100
+      | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * rep_factor * percent_ownership / 100
       
       | eval cold_calc_gb        = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
       | eval cold_calc_gb         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_calc_gb)
-      | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * percent_ownership / 100
+      | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * rep_factor * percent_ownership / 100
       
       | eval total_storage_conf_gb = hot_warm_calc_gb + cold_calc_gb
       
@@ -49,11 +50,11 @@
       
       | foreach *_cost *_rate *GB cold_calc_gb percent_ownership [ eval &lt;&lt;FIELD&gt;&gt; = round( '&lt;&lt;FIELD&gt;&gt;' , 2 ) ]
       
-      | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB, totalPathmaxDataSizeGB
+      | table idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB, totalPathmaxDataSizeGB, rep_factor
       
-      | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB, totalPathmaxDataSizeGB
+      | sort  idx, splunk_server, eai:acl.app, max_lic_GB, license_rate, lic_cost, currentDBSizeGB, unused_lic_GB, homePath_expanded, coldPath_expanded, maxTotalDataSizeGB, totalEventCount, disabled, years_retention, hot_warm_calc_gb, hot_warm_storage_rate, hot_warm_storage_cost, cold_calc_gb, cold_storage_rate, cold_storage_cost, stor_cost, percent_ownership, total_cost, total_storage_conf_gb, group, homePathmaxDataSizeGB, coldPathmaxDataSizeGB, totalPathmaxDataSizeGB, rep_factor
       
-      | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf License GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Index Size GB", unused_lic_GB AS "Available License GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, percent_ownership AS "Percent Ownership", hot_warm_calc_gb AS "Hot/Warm Calc GB", cold_calc_gb AS "Cold Calc GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB",homePathmaxDataSizeGB AS "Max Hot/Warm Size GB", coldPathmaxDataSizeGB AS "Max Cold Size GB", totalPathmaxDataSizeGB AS "Max Hot/Warm/Cold Total"</query>
+      | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf License GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Index Size GB", unused_lic_GB AS "Available License GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, percent_ownership AS "Percent Ownership", hot_warm_calc_gb AS "Hot/Warm Calc GB", cold_calc_gb AS "Cold Calc GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB",homePathmaxDataSizeGB AS "Max Hot/Warm Size GB", coldPathmaxDataSizeGB AS "Max Cold Size GB", totalPathmaxDataSizeGB AS "Max Hot/Warm/Cold Total", rep_factor AS "Replication Factor"</query>
   </search>
   <label>Charge Back</label>
   <fieldset autoRun="true" submitButton="true">
@@ -96,6 +97,17 @@
       <default>2</default>
       <initialValue>2</initialValue>
     </input>
+    <input type="dropdown" token="rep_factor" searchWhenChanged="true">
+      <label>Replication Factor</label>
+      <default>1</default>
+      <choice value="1">1</choice>
+      <choice value="2">2</choice>
+      <choice value="3">3</choice>
+      <choice value="4">4</choice>
+      <choice value="5">5</choice>
+      <fieldForLabel>rep_factor</fieldForLabel>
+      <fieldForValue>rep_factor</fieldForValue>
+    </input>   
   </fieldset>
   <row id="tabs">
     <panel>
@@ -270,7 +282,11 @@
       <table>
         <title>Yearly Storage Charges for $group|s$</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "Max Index Size GB", "Hot/Warm Calc GB", "Hot/Warm Calc GB", "Hot/Warm Storage Rate", "Hot/Warm Storage Cost", "Cold Calc GB", "Cold Rate", "Cold Storage Cost", "Percent Ownership", "Storage Cost"                       | eval "Percent Ownership"='Percent Ownership'+" %"             | eval "Hot/Warm Storage Cost"="$currency_symbol$".tostring('Hot/Warm Storage Cost',"commas")             | eval "Cold Storage Cost"="$currency_symbol$".tostring('Cold Storage Cost',"commas")             | eval "Storage Cost"="$currency_symbol$".tostring('Storage Cost',"commas")</query>
+          <query>table Index, "Splunk Server", "Replication Factor", "Percent Ownership", "Max Index Size GB", "Hot/Warm Calc GB", "Hot/Warm Calc GB", "Hot/Warm Storage Rate", "Hot/Warm Storage Cost", "Cold Calc GB", "Cold Rate", "Cold Storage Cost", "Storage Cost"                       
+            | eval "Percent Ownership"='Percent Ownership'+" %"             
+            | eval "Hot/Warm Storage Cost"="$currency_symbol$".tostring('Hot/Warm Storage Cost',"commas")             
+            | eval "Cold Storage Cost"="$currency_symbol$".tostring('Cold Storage Cost',"commas")          
+            | eval "Storage Cost"="$currency_symbol$".tostring('Storage Cost',"commas")</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
@@ -491,7 +507,7 @@
       <table id="highlight2">
         <title>Storage Detail</title>
         <search base="globalCalc">
-          <query>table Index, "Splunk Server", "Years Retention", "Current GB Used", "Available License GB", "Percent Ownership", "Max Index Size GB", "Max Hot/Warm Size GB", "Hot/Warm Max Data Size GB", "Hot/Warm Calc GB", "Hot/Warm Rate", "Hot/Warm Storage Cost", "Max Storage GB", "Max Cold Size GB", "Cold Calc GB", "Cold Storage Rate", "Cold Storage Cost", "Storage Cost", "Total Cost"</query>
+          <query>table Index, "Splunk Server", "Years Retention", "Current GB Used", "Available License GB", "Replication Factor", "Percent Ownership", "Max Index Size GB", "Max Hot/Warm Size GB", "Hot/Warm Max Data Size GB", "Hot/Warm Calc GB", "Hot/Warm Rate", "Hot/Warm Storage Cost", "Max Storage GB", "Max Cold Size GB", "Cold Calc GB", "Cold Storage Rate", "Cold Storage Cost", "Storage Cost", "Total Cost"</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>

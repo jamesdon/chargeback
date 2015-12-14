@@ -42,6 +42,7 @@ I think that it is worth taking a look deeper at the calculations used to drive 
       | eval license_rate          = $license_rate$
       | eval hot_warm_storage_rate = $hot_warm_storage_rate$
       | eval cold_storage_rate     = $cold_storage_rate$
+      | eval rep_factor            = $rep_factor$
       | eval "Years Retention"     = round(frozenTimePeriodInSecs/31536000,2)
    
       ### The search results return many fields that are in MBs, we want to convert them to GBs and rename the fields   
@@ -49,12 +50,12 @@ I think that it is worth taking a look deeper at the calculations used to drive 
       
       ### We are determining what the hot_warm_conf value is, or more specifically the "hot/warm bucket configuration".  This is not a simple matching of field names, since setting certain values to 0 makes them unlimited.  Read this documentation for detailed information  about each parameter - http://docs.splunk.com/Documentation/Splunk/6.2.0/Admin/Indexesconf
       | eval hot_warm_calc_gb      = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
-      | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * percent_ownership / 100
+      | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * rep_factor * percent_ownership / 100
       
       ### We are now determining what the cold_conf value is, or more specifically the "cold bucket configuration".  This takes an extra step when compared to the hot/warm buckets.  See the same documentation to understand why.
       | eval cold_calc_gb        = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
       | eval cold_calc_gb         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_calc_gb)
-      | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * percent_ownership / 100
+      | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * rep_factor * percent_ownership / 100
       
       ### Combine the two calculated fields so that we can audit it later
       | eval total_storage_conf_gb = hot_warm_calc_gb + cold_calc_gb

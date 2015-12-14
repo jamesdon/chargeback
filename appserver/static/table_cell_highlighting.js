@@ -11,14 +11,14 @@ require([
     var CustomRangeRenderer = TableView.BaseCellRenderer.extend({
         canRender: function(cell) {
             // Enable this custom cell renderer for all fields evaluated below
-            return _(['Disabled','Max Conf License GB','License Rate','Percent Ownership','License Cost','Event Count']).contains(cell.field);
+            return _(['Disabled','Max Conf License GB','License Rate','Replication Factor','Percent Ownership','License Cost','Event Count']).contains(cell.field);
         },
         render: function($td, cell) {
             // Add a class to the cell based on the returned value
             var value = parseFloat(cell.value);
 
             // Apply interpretation for all of the following fields
-            if (cell.field === 'Max Conf License GB' || cell.field === 'License Rate' || cell.field === 'Percent Ownership' || cell.field === 'License Cost' || cell.field === 'Event Count') {
+            if (cell.field === 'Max Conf License GB' || cell.field === 'License Rate' || cell.field === 'Replication Factor' || cell.field === 'Percent Ownership' || cell.field === 'License Cost' || cell.field === 'Event Count') {
                 if (value > 0) {
                     $td.addClass('range-cell').addClass('range-green');
                 }
