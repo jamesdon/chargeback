@@ -432,12 +432,15 @@
   <row id="tab_license">
     <panel>
       <table>
-        <title>Splunk Index Sizes in Indexes.conf (parameter name in parenthesis)</title>
+        <title>Splunk Index Sizes in Indexes.conf (parameter name in parenthesis).  * Note that all configuration lines are in MB.</title>
         <search base="globalCalc">
           <query>| dedup Index 
+            | eval "Max Hot/Warm Size MB (homePath.maxDataSizeMB)" = 'Max Hot/Warm Size GB' * 1024
+            | eval "Max Cold Size MB (coldPath.maxDataSizeMB)"     = 'Max Cold Size GB' * 1024
+            | eval "Max Index Size MB (maxTotalDataSizeMB)"        = 'Max Index Size GB' * 1024
+            | eval "Max Hot/Warm/Cold Total MB"                    = 'Max Hot/Warm/Cold Total' * 1024
             | where ('Max Index Size GB' &lt; 'Max Hot/Warm Size GB') OR ('Max Index Size GB' &lt; 'Max Cold Size GB') OR ('Max Index Size GB' &lt; 'Max Hot/Warm/Cold Total')             
-            | rename "Max Hot/Warm Size GB" AS "Max Hot/Warm Size GB (homePath.maxDataSizeMB)", "Max Cold Size GB" AS "Max Cold Size GB (coldPath.maxDataSizeMB)", "Max Index Size GB" AS "Max Index Size GB (maxTotalDataSizeMB)"
-            | table Index, "Max Hot/Warm Size GB (homePath.maxDataSizeMB)", "Max Cold Size GB (coldPath.maxDataSizeMB)", "Max Hot/Warm/Cold Total", "Max Index Size GB (maxTotalDataSizeMB)"</query>
+            | table Index, "Max Hot/Warm Size MB (homePath.maxDataSizeMB)", "Max Cold Size MB (coldPath.maxDataSizeMB)", "Max Hot/Warm/Cold Total MB", "Max Index Size MB (maxTotalDataSizeMB)"</query>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
