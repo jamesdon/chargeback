@@ -1,7 +1,3 @@
 <nav search_view="search" color="#65A637">
-  <view name="search" default='true' />
-  <view name="data_models" />
-  <view name="reports" />
-  <view name="alerts" />
-  <view name="dashboards" />
+  <view name="charge_back" default='true' />
 </nav>
