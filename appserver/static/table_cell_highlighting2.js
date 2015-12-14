@@ -11,7 +11,7 @@ require([
     var CustomRangeRenderer = TableView.BaseCellRenderer.extend({
         canRender: function(cell) {
             // Enable this custom cell renderer for all fields evaluated below
-            return _(['Years Retention','Current GB Used','Max Hot/Warm Size GB','Max Index Size GB','Hot/Warm Calc GB','Hot/Warm Rate','Hot/Warm Storage Cost','Max Cold Size GB','Cold Calc GB','Cold Rate','Cold Storage Cost','Storage Cost','Storage Cost','Percent Ownership','Total Cost', 'Available Lic GB']).contains(cell.field);
+            return _(['Years Retention','Current GB Used','Max Hot/Warm Size GB','Max Index Size GB','Hot/Warm Calc GB','Hot/Warm Rate','Hot/Warm Storage Cost','Max Cold Size GB','Cold Calc GB','Cold Rate','Cold Storage Cost','Storage Cost','Storage Cost','Percent Ownership','Total Cost', 'Available License GB']).contains(cell.field);
         },
         render: function($td, cell) {
             // Add a class to the cell based on the returned value
@@ -57,7 +57,7 @@ require([
             }
 
             // Apply interpretation for Green default values
-            if (cell.field === 'Current GB Used' || cell.field === 'Available Lic GB' || cell.field === 'Storage Cost' || cell.field === 'Years Retention' || cell.field === 'Total Cost') {
+            if (cell.field === 'Current GB Used' || cell.field === 'Available License GB' || cell.field === 'Storage Cost' || cell.field === 'Years Retention' || cell.field === 'Total Cost') {
                 if (value >= 0) {
                     $td.addClass('range-cell').addClass('range-green');
                 }
