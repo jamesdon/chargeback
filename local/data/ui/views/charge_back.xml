@@ -62,9 +62,7 @@
       <default>*</default>
       <choice value="*">All</choice>
       <search>
-        <query>index=_internal source=*license_usage.log type="Usage" 
-          | append [| inputlookup customers.csv] 
-          | stats count by group</query>
+        <query>| inputlookup customers.csv | dedup group | sort + group</query>
         <earliest>-30d</earliest>
         <latest>now</latest>
       </search>
@@ -404,7 +402,7 @@
     </panel>
     <panel>
       <table>
-        <title>Max Lic GB in customers.csv</title>
+        <title>Max Conf Licence GB in customers.csv</title>
         <search>
           <query>| rest /services/data/indexes                      
             | rename title as idx
@@ -434,7 +432,7 @@
   <row id="tab_license">
     <panel>
       <table>
-        <title>Splunk Index Sizes in Indexes.conf (actual parameter name in parenthesis)</title>
+        <title>Splunk Index Sizes in Indexes.conf (parameter name in parenthesis)</title>
         <search base="globalCalc">
           <query>| dedup Index 
             | where ('Max Index Size GB' &lt; 'Max Hot/Warm Size GB') OR ('Max Index Size GB' &lt; 'Max Cold Size GB') OR ('Max Index Size GB' &lt; 'Max Hot/Warm/Cold Total')             
