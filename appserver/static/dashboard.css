@@ -39,6 +39,11 @@ input, textarea, .uneditable-input {
 #input3 {
 	margin-left:20px;
 }
+#search_btn .btn-primary  {
+    position:relative;
+    left:40px !important;
+
+}
 .dashboard-header h2 {
     font-size: 24px;
     margin-bottom: 10px;
