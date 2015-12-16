@@ -1,4 +1,4 @@
-The Charge Back App is intended to calculate maintenance and yearly run rates for Splunk.    
+The Chargeback App is intended to calculate maintenance and yearly run rates for Splunk.    
 
 If you are running Splunk in a medium to large environment, you are probably sharing Splunk with other groups.  In many places, this results in one group running Splunk as a service for any number of internal customers.  The challenge then becomes sharing the maintenance and run costs of the infrastructure.  As a Splunk administrator, I would have to run several long-running searches to try and figure out the costs.  This App should put all of that to rest.
 
@@ -48,11 +48,67 @@ I think that it is worth taking a look deeper at the calculations used to drive 
       ### The search results return many fields that are in MBs, we want to convert them to GBs and rename the fields   
       | foreach *MB [ eval &lt;&lt;MATCHSTR&gt;&gt;GB = '&lt;&lt;FIELD&gt;&gt;' / 1024 ]
       
-      ### We are determining what the hot_warm_conf value is, or more specifically the "hot/warm bucket configuration".  This is not a simple matching of field names, since setting certain values to 0 makes them unlimited.  Read this documentation for detailed information  about each parameter - http://docs.splunk.com/Documentation/Splunk/6.2.0/Admin/Indexesconf
+      ### Next are determining what the hot_warm_conf value is, or more specifically the "hot/warm bucket configuration".  
+      ### We are then determining what the cold_conf value is, or more specifically the "cold bucket configuration".
+      ### This is not a simple matching of field names, since setting certain values to 0 makes them unlimited.  
+      ### Read the indexes.conf documentation on Splunk's website for detailed information about each parameter.
+      ### Below is an excerpt from that documentation, highlighting the configuration parameters used in this calulation:
+	 
+	# maxTotalDataSizeMB = <nonnegative integer>
+	# * The maximum size of an index (in MB).
+	# * If an index grows larger than the maximum size, the oldest data is frozen.
+	# * This parameter only applies to hot, warm, and cold buckets.  It does not
+	#   apply to thawed buckets.
+	# * Defaults to 500000.
+	# * Highest legal value is 4294967295
+	# 
+	# homePath.maxDataSizeMB = <nonnegative integer>
+	# * Specifies the maximum size of homePath (which contains hot and warm
+	#   buckets).
+	# * If this size is exceeded, Splunk will move buckets with the oldest value
+	#   of latest time (for a given bucket) into the cold DB until homePath is
+	#   below the maximum size.
+	# * If this attribute is missing or set to 0, Splunk will not constrain the
+	#   size of homePath.
+	# * If we freeze buckets due to enforcement of this policy parameter, and
+	#   coldToFrozenScript and/or coldToFrozenDir archiving parameters are also
+	#   set on the index, these parameters *will* take into effect
+	# * Defaults to 0.
+	# * Highest legal value is 4294967295
+	# 
+	# coldPath.maxDataSizeMB = <nonnegative integer>
+	# * Specifies the maximum size of coldPath (which contains cold buckets).
+	# * If this size is exceeded, Splunk will freeze buckets with the oldest value
+	#   of latest time (for a given bucket) until coldPath is below the maximum
+	#   size.
+	# * If this attribute is missing or set to 0, Splunk will not constrain size
+	#   of coldPath
+	# * If we freeze buckets due to enforcement of this policy parameter, and
+	#   coldToFrozenScript and/or coldToFrozenDir archiving parameters are also
+	#   set on the index, these parameters *will* take into effect
+	# * Defaults to 0.
+	# * Highest legal value is 4294967295
+	#
+	# maxDataSize = <positive integer>|auto|auto_high_volume
+	# * The maximum size in MB for a hot DB to reach before a roll to warm is triggered.
+	# * Specifying "auto" or "auto_high_volume" will cause Splunk to autotune this parameter (recommended).
+	# * You should use "auto_high_volume" for high-volume indexes (such as the main
+	#   index); otherwise, use "auto".  A "high volume index" would typically be
+	#   considered one that gets over 10GB of data per day.
+	# * Defaults to "auto", which sets the size to 750MB.
+	# * "auto_high_volume" sets the size to 10GB on 64-bit, and 1GB on 32-bit systems.
+	# * Although the maximum value you can set this is 1048576 MB, which corresponds to 1 TB, a reasonable 
+	#   number ranges anywhere from 100 to 50000.  Before proceeding with any higher value, please seek
+	#   approval of Splunk Support.
+	# * If you specify an invalid number or string, maxDataSize will be auto tuned.
+	# * NOTE: The maximum size of your warm buckets may slightly exceed 'maxDataSize', due to post-processing and 
+	#   timing issues with the rolling policy.
+
+
+      ### Below are the calculations
       | eval hot_warm_calc_gb      = if('homePath.maxDataSizeGB' == 0, maxTotalDataSizeGB, 'homePath.maxDataSizeGB')
       | eval hot_warm_storage_cost = hot_warm_calc_gb * hot_warm_storage_rate * rep_factor * percent_ownership / 100
       
-      ### We are now determining what the cold_conf value is, or more specifically the "cold bucket configuration".  This takes an extra step when compared to the hot/warm buckets.  See the same documentation to understand why.
       | eval cold_calc_gb        = maxTotalDataSizeGB - 'homePath.maxDataSizeGB'
       | eval cold_calc_gb         = if('coldPath.maxDataSizeGB' == 0 AND 'homePath.maxDataSizeGB' = 0, 0, cold_calc_gb)
       | eval cold_storage_cost = cold_calc_gb * cold_storage_rate * rep_factor * percent_ownership / 100
@@ -100,7 +156,7 @@ The same as the license dashboard, but created with a focus on storage.  The col
 	Red - Used for "hot/warm" storage calculations
 	Blue - Used for "cold" storage calculations
 
-Please provide feedback and/or enhancement requests to jim@splunk.com.
+Please provide feedback and/or enhancement requests to jim@splunk.com.  I will respond within three business days or sooner to address any issues that are reported.  
 
 Application development is hosted on github - https://github.com/jamesdon/chargeback, if you would like to join in on the fun!
 

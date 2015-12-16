@@ -56,7 +56,7 @@
       
       | rename idx AS Index, splunk_server AS "Splunk Server", max_lic_GB AS "Max Conf License GB", license_rate AS "License Rate", lic_cost AS "License Cost", stor_cost AS "Storage Cost", total_cost AS "Total Cost", currentDBSizeGB AS "Current GB Used", maxTotalDataSizeGB AS "Max Index Size GB", unused_lic_GB AS "Available License GB", eai:acl.app AS "App ACL", totalEventCount AS "Event Count", disabled AS Disabled, percent_ownership AS "Percent Ownership", hot_warm_calc_gb AS "Hot/Warm Calc GB", cold_calc_gb AS "Cold Calc GB", hot_warm_storage_rate AS "Hot/Warm Storage Rate", cold_storage_rate AS "Cold Rate", hot_warm_storage_cost AS "Hot/Warm Storage Cost", cold_storage_cost AS "Cold Storage Cost", total_storage_conf_gb AS "Total Storage Conf GB",homePathmaxDataSizeGB AS "Max Hot/Warm Size GB", coldPathmaxDataSizeGB AS "Max Cold Size GB", totalPathmaxDataSizeGB AS "Max Hot/Warm/Cold Total", rep_factor AS "Replication Factor"</query>
   </search>
-  <label>Chargeback</label>
+  <label>Charge Back</label>
   <fieldset autoRun="true" submitButton="true">
     <input type="dropdown" token="group" searchWhenChanged="true">
       <label>Select a Group:</label>
