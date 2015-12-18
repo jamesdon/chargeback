@@ -1,2 +1,5 @@
 #Ignore perms created during developement
 metadata/local.meta
+
+#Ignore my debug menu
+local/data/ui/nav/default.xml
