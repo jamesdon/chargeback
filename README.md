@@ -4,9 +4,21 @@ If you are running Splunk in a medium to large environment, you are probably sha
 
 
 Changes to Splunk:
-This App will not install new indexes, but will increase frozenTimePeriodInSecs to _internal to 13 months (34186670 seconds).
+This App will not install new indexes, you may want to consider increasing the  frozenTimePeriodInSecs for _internal:
+
+	### Save _internal for 13 months
+	indexes.conf:
+
+	[_internal]
+	frozenTimePeriodInSecs = 34186670
+
+This will ensure that you can run predictive analysis over a longer period of time. 
 
 There are not any special installation steps for this App, but there are REQUIRED configuration steps below.
+
+
+Upgrades:
+If you are upgrading, be sure to back up your customers.csv file.  An upgrade will overwrite it.
 
 
 Configuration:
@@ -14,6 +26,7 @@ You will need to update the customers.csv lookup file to customize the App to su
 
 	https://splunkbase.splunk.com/app/1724/
 
+If you do not have the App installed, the configure button will lead to a dead link.
 
 There is a single dashboard for this App with several tabs.  The filters at the top will effect all of the tabs.  Below, I will explain each tab.
 

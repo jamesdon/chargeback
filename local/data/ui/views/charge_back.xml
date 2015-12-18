@@ -125,12 +125,12 @@
       <!-- end easy_button container element -->
       <html>
         <ul id="tabs" class="nav nav-tabs">
-          <li class="active">
-            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util">Index Utilization and Prediction</a>
-          </li>
           <li>
             <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_calc,tab_cost" data-token="control_token_cost">Customer Costs</a>
           </li>          
+          <li class="active">
+            <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util">Index Utilization and Prediction</a>
+          </li>
           <li>
             <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_audit,tab_license">Configuration Audit</a>
           </li>     
@@ -161,7 +161,9 @@
               </div>
               <div class="modal-body">
                 <p>
-                  <b>Set Up</b> - This panel contains set up information for the Chargeback app. <code>Note that you will need to download the "<a href="https://splunkbase.splunk.com/app/1724/">File Lookup Editor App</a>"</code> from Splunk apps in order for you to input and edit groups, costs, etc. <br/>
+                  <b>Set Up</b> - This panel contains set up information for the Chargeback app. <code>Note that you will need to download the "<a href="https://splunkbase.splunk.com/app/1724/">File Lookup Editor App</a>"</code> from Splunk apps in order for you to input and edit groups, costs, etc. 
+                  <br/>If you do not have the App installed, the configure button will lead to a dead link.
+                  <br/>
                   <br/>
                   <code>You will then need to update the customers.csv </code> file to reflect the departments in your environment. There is a "ChargeBack Configuration Audit" below, which will help you identify anything that is missing. <br/>
                   <br/>
