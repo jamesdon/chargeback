@@ -125,10 +125,10 @@
       <!-- end easy_button container element -->
       <html>
         <ul id="tabs" class="nav nav-tabs">
-          <li>
+          <li class="active">
             <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_calc,tab_cost" data-token="control_token_cost">Customer Costs</a>
           </li>          
-          <li class="active">
+          <li>
             <a href="#" class="toggle-tab" data-toggle="tab" data-elements="tab_util">Index Utilization and Prediction</a>
           </li>
           <li>
