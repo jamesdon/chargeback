@@ -1,5 +1,12 @@
 #Ignore perms created during developement
 metadata/local.meta
 
-#Ignore my debug menu
+#Ignore my debug menu and test indexes
 local/data/ui/nav/default.xml
+local/indexes.conf
+
+#Ignore the lookup files created by the lookup editor
+lookups/lookup_file_backups/
+
+#Ignore the old versions of the default dir
+default.old.*
