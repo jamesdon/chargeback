@@ -1,0 +1,81 @@
+group,idx, max_lic_GB, percent_ownership
+Unix,os, 5,60
+Development,os, 7,60
+Jimbo,apps, 9.01,100
+Marketing,os,5,10
+Development,dev, 2,100
+Development,dev1,3,50
+Development,dev2,2,75
+Development,dev3,4,100
+Development,dev4,1,100
+Development,dev5,2,100
+Development,dev6,5,100
+Jimbo,dev1,6,75
+Architecture,main, 3,100
+Development Team,shakespeare, 4 ,50
+Info Sec,fake, 1.01,100
+Info Sec,really_fake, 1.101,100
+Development,automatic,2,100
+Cloud,aws,3,100
+Cloud,aws-cloudtrail,3,100
+Cloud,aws-config,3,100
+Security,burch_audit,1,100
+Unix,burch_dreamhost,4,100
+Network,burch_firewall,50,100
+Unix,burch_inventory,2,100
+Net Mgt,burch_splunkadmin,1,100
+Web,burch_webmon,30,100
+Gov,faa,2,100
+Info Sec,firedalerts,.5,100
+Voice,gvoice,2,100
+Unix,history,1,100
+Unix,os,55,100
+Win,perfmon,25,100
+Marketing,sf_food_health,5,100
+Marketing,sfpd,3,100
+Big Data,shakespeare,.1,50
+Unix,sos,2,100
+Unix,sos_summary_daily,1,100
+Unix,splunklogger,40,100
+Unix,summary,2,100
+Unix,summary_firebrigade,3,100
+Unix,summary_iops,1,100
+Dev,test,3,100
+Web,webmon,15,100
+Win,windows,60,100
+Win,wineventlog,45,100
+Info Sec,access_summary,2,100
+Info Sec,access_summary2,2,100
+Info Sec,anomaly_detection,5,100
+Info Sec,audit_summary,2,100
+Info Sec,audit_summary2,2,100
+Info Sec,cim_summary,1,100
+Cloud,cloud,25,100
+Unix,core,35,100
+Marketing,corporate,6,100
+Marketing,customer_info,5,100
+Info Sec,endpoint_summary,3,100
+Info Sec,endpoint_summary2,3,100
+Big Data,hunk,100,100
+Operations,ioc,5,100
+Operations,itsi_notable,1,100
+Operations,itsi_summary,1,100
+Mobile,mint,25,100
+Network,network_summary,1,100
+Network,network_summary2,1,100
+Network,network_summary3,1,100
+Operations,notable,1,100
+Operations,notable_summary,1,100
+Info Sec,pci,45,100
+Info Sec,pci_posture_summary,1,100
+Info Sec,pci_req6_summary,1,100
+Info Sec,pci_summary,1,100
+Info Sec,proxy_center_summary,1,100
+Info Sec,proxy_center_summary2,1,100
+Info Sec,risk,1,100
+Info Sec,security,65,100
+Info Sec,whois,5,100
+Network,session_end,10,100
+Network,session_start,10,100
+Unix,sizing,5,100
+Operations,support,5,100
